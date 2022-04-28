@@ -14,6 +14,7 @@ import torch.nn.functional as F
 
 torch.manual_seed(1337)
 
+
 class SequenceToVector(nn.Module):
     """
     It is an abstract class defining SequenceToVector enocoder
@@ -26,15 +27,16 @@ class SequenceToVector(nn.Module):
         Last dimension of the input input vector sequence that
         this SentenceToVector encoder will encounter.
     """
+
     def __init__(self,
                  input_dim: int) -> 'SequenceToVector':
         super(SequenceToVector, self).__init__()
         self._input_dim = input_dim
 
     def forward(self,
-             vector_sequence: torch.Tensor,
-             sequence_mask: torch.Tensor,
-             training=False) -> Dict[str, torch.Tensor]:
+                vector_sequence: torch.Tensor,
+                sequence_mask: torch.Tensor,
+                training=False) -> Dict[str, torch.Tensor]:
         """
         Forward pass of Main Classifier.
 
@@ -82,7 +84,8 @@ class DanSequenceToVector(SequenceToVector):
     dropout : `float`
         Token dropout probability as described in the paper.
     """
-    def __init__(self, input_dim: int, num_layers: int, dropout: float = 0.2, device = 'cpu'):
+
+    def __init__(self, input_dim: int, num_layers: int, dropout: float = 0.2, device='cpu'):
         super(DanSequenceToVector, self).__init__(input_dim)
         # TODO(students): start
 
@@ -90,24 +93,25 @@ class DanSequenceToVector(SequenceToVector):
         self.num_layers = num_layers
 
         # likelihood of a word being dropped
-        self.dropout = dropout 
+        self.dropout = dropout
 
         self.device = device
 
         self.layers = nn.Sequential()
 
         for i in range(num_layers):
-                self.layers.add_module(f"linear{i+1}", nn.Linear(in_features=self._input_dim, out_features=self._input_dim))
+            self.layers.add_module(f"linear{i + 1}",
+                                   nn.Linear(in_features=self._input_dim, out_features=self._input_dim))
 
-                if i < num_layers - 1:
-                    self.layers.add_module(f"RELU_{i+1}", nn.ReLU())
+            if i < num_layers - 1:
+                self.layers.add_module(f"RELU_{i + 1}", nn.ReLU())
 
         # TODO(students): end
 
     def forward(self,
-             vector_sequence: torch.Tensor,
-             sequence_mask: torch.Tensor,
-             training=False) -> torch.Tensor:
+                vector_sequence: torch.Tensor,
+                sequence_mask: torch.Tensor,
+                training=False) -> torch.Tensor:
         # TODO(students): start
 
         # Unpack the dimensions vector_sequence into into variables
@@ -120,23 +124,21 @@ class DanSequenceToVector(SequenceToVector):
         # from paper: randomly drop some tokens before computing average to improve performance
         # don't do this if we're not training the model
         if training:
-
             # Randomly generate a dropout matrix to be applied as a mask
             dropout_matrix = self.gen_dropout_matrix(batch_size, max_tokens_num)
 
             # to help with applying mask to sequence
             # adding a third dimension of size 1 helps zero out the embedding vectors for
             # dropped tokens
-            dropout_matrix = torch.unsqueeze(dropout_matrix, 2) 
+            dropout_matrix = torch.unsqueeze(dropout_matrix, 2)
 
             # element-wise multiplication
             vector_sequence = torch.mul(vector_sequence, dropout_matrix)
 
             # Get num of words (now less bc of dropped tokens)
-            dropout_matrix = torch.squeeze(dropout_matrix) # reshape the dropout_matrix
+            dropout_matrix = torch.squeeze(dropout_matrix)  # reshape the dropout_matrix
             updated_seq_mask = torch.mul(sequence_mask, dropout_matrix)
             total_words_in_sequences = torch.count_nonzero(updated_seq_mask, dim=1)
-
 
         # Get average vector
         # Sum up the embeddings 
@@ -159,17 +161,14 @@ class DanSequenceToVector(SequenceToVector):
             # add the representations after before undergoing relu activation
             if type(fflayer) == nn.modules.linear.Linear:
                 layer_representations.append(combined_vector)
-        
 
         # stack the representations and turn into a tensor
         layer_representations = torch.stack(layer_representations, dim=0)
 
-        
         # TODO(students): end
         return {"combined_vector": combined_vector,
                 "layer_representations": layer_representations}
 
-        
     def gen_dropout_matrix(self, batch_size, max_tokens_num):
         """
         Helper function. Generate a matrix of shape batch_size by max_tokens_num
@@ -190,9 +189,8 @@ class DanSequenceToVector(SequenceToVector):
                 else:
                     dropout_matrix[i][j] = torch.tensor(1, dtype=torch.float32)
 
-
         return dropout_matrix
-        
+
 
 class GruSequenceToVector(SequenceToVector):
     """
@@ -208,7 +206,8 @@ class GruSequenceToVector(SequenceToVector):
         Number of layers in this GRU-based encoder. Note that each layer
         is a GRU encoder unlike DAN where they were feedforward based.
     """
-    def __init__(self, input_dim: int, num_layers: int, device = 'cpu'):
+
+    def __init__(self, input_dim: int, num_layers: int, device='cpu'):
         super(GruSequenceToVector, self).__init__(input_dim)
         # TODO(students): start
         self.num_layers = num_layers
@@ -218,9 +217,9 @@ class GruSequenceToVector(SequenceToVector):
         # TODO(students): end
 
     def forward(self,
-             vector_sequence: torch.Tensor,
-             sequence_mask: torch.Tensor,
-             training=False) -> torch.Tensor:
+                vector_sequence: torch.Tensor,
+                sequence_mask: torch.Tensor,
+                training=False) -> torch.Tensor:
         # TODO(students): start
 
         # vector_sequence: batch_size * max_tokens_num * embedding_dimension (64, 209, 50)
@@ -232,8 +231,8 @@ class GruSequenceToVector(SequenceToVector):
         # method signature: (input, lengths, batch_first, enforce_sorted
         # batch_first defaults to False, but vector_sequence's first dim is batch size
         # enforce_sorted is false bc the sequences are not sorted by length
-        vector_sequence = torch.nn.utils.rnn.pack_padded_sequence(vector_sequence, lengths=lengths, 
-                                                                    batch_first=True, enforce_sorted=False)
+        vector_sequence = torch.nn.utils.rnn.pack_padded_sequence(vector_sequence, lengths=lengths,
+                                                                  batch_first=True, enforce_sorted=False)
 
         # as per pytorch docs:
         # output has shape (sequence_length, batch, num_directions * hidden_size)
@@ -241,9 +240,127 @@ class GruSequenceToVector(SequenceToVector):
         output, h_n = self.gru(vector_sequence)
 
         layer_representations = h_n
-        combined_vector =  layer_representations[-1, :, :] # the representation at the final layer
-        
-        
+        combined_vector = layer_representations[-1, :, :]  # the representation at the final layer
+
+        # TODO(students): end
+        return {"combined_vector": combined_vector,
+                "layer_representations": layer_representations}
+
+
+class CNNSequenceToVector(SequenceToVector):
+    #TODO
+    def __init__(self, input_dim: int, num_layers: int, stride=2, device='cpu'):
+        super(CNNSequenceToVector, self).__init__(input_dim)
+        layers = []
+
+        for _ in range(num_layers):
+            layers.append(nn.Conv2d())
+
+
+class DanWithAttentionSequenceToVector(SequenceToVector):
+    """
+    It is a class defining Deep Averaging Network based Sequence to Vector
+    encoder. You have to implement this.
+
+    Parameters
+    ----------
+    input_dim : ``str``
+        Last dimension of the input input vector sequence that
+        this SentenceToVector encoder will encounter.
+    num_layers : ``int``
+        Number of layers in this DAN encoder.
+    dropout : `float`
+        Token dropout probability as described in the paper.
+    """
+
+    def __init__(self, input_dim: int, num_layers: int, embedding_dim: int = 50, dropout: float = 0.2, device='cpu'):
+        super(DanWithAttentionSequenceToVector, self).__init__(input_dim)
+        # TODO(students): start
+        layers = []
+        self.device = device
+
+        for _ in range(num_layers - 1):
+            layers.append(nn.Linear(in_features=input_dim, out_features=input_dim, device=device))
+            layers.append(nn.ReLU())
+
+        layers.append(nn.Linear(in_features=input_dim, out_features=input_dim, device=device))
+
+        self.attention = nn.MultiheadAttention(embed_dim=embedding_dim, num_heads=1, batch_first=True)
+        self.model = nn.ModuleList(layers)
+        self.dropout = dropout
+        # TODO(students): end
+
+    def forward(self,
+                vector_sequence: torch.Tensor,
+                sequence_mask: torch.Tensor,
+                training=False) -> torch.Tensor:
+        # TODO(students): start
+        if training:
+            prob = torch.full(sequence_mask.size(), 1 - self.dropout, device=self.device)
+            drop_mask = torch.bernoulli(prob)
+            sequence_mask = sequence_mask * drop_mask
+
+        # zeros out the embeddings of the padding and dropped words so that they don't contribute to the average
+        vector_sequence = vector_sequence * sequence_mask[:, :, None]
+
+        # runs through attention mechanism
+        vector_sequence = self.attention(vector_sequence, vector_sequence, vector_sequence)
+
+        # computes the averages of the inputs
+        combined_vector = torch.sum(vector_sequence, dim=1)
+        num_words = torch.sum(sequence_mask, dim=1)
+        num_words[num_words == 0] = 1  # replaces all 0s with 1s so no divide by zero error is thrown
+
+        combined_vector = combined_vector * torch.reciprocal(num_words[:, None])
+
+        stack = []
+        for i, layer in enumerate(self.model):
+            combined_vector = layer(combined_vector)
+            if i % 2 == 0:
+                stack.append(torch.clone(combined_vector))
+
+        stack.append(torch.clone(combined_vector))
+        layer_representations = torch.stack(stack, dim=1)
+        # TODO(students): end
+        return {"combined_vector": combined_vector,
+                "layer_representations": layer_representations}
+
+
+class BiLSTMSequenceToVector(SequenceToVector):
+    """
+    It is a class defining GRU based Sequence To Vector encoder.
+    You have to implement this.
+
+    Parameters
+    ----------
+    input_dim : ``str``
+        Last dimension of the input input vector sequence that
+        this SentenceToVector encoder will encounter.
+    num_layers : ``int``
+        Number of layers in this GRU-based encoder. Note that each layer
+        is a GRU encoder unlike DAN where they were feedforward based.
+    """
+
+    def __init__(self, input_dim: int, num_layers: int, device='cpu'):
+        super(BiLSTMSequenceToVector, self).__init__(input_dim)
+        # TODO(students): start
+        self.layers = nn.LSTM(input_size=input_dim, hidden_size=input_dim, num_layers=num_layers, batch_first=True,
+                              bidirectional=True, device=device)
+        # TODO(students): end
+
+    def forward(self,
+                vector_sequence: torch.Tensor,
+                sequence_mask: torch.Tensor,
+                training=False) -> torch.Tensor:
+        # TODO(students): start
+        vector_sequence = vector_sequence * sequence_mask[:, :, None]
+        lengths = torch.sum(sequence_mask, dim=1)
+        padded = nn.utils.rnn.pack_padded_sequence(vector_sequence, lengths,
+                                                   batch_first=True, enforce_sorted=False)
+
+        _, layer_representations = self.layers(padded)
+        combined_vector = layer_representations[-1]
+        layer_representations = torch.permute(layer_representations, (1, 0, 2))
         # TODO(students): end
         return {"combined_vector": combined_vector,
                 "layer_representations": layer_representations}
