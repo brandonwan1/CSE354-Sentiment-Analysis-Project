@@ -1,0 +1,84 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+
+    // These configurations are here to help debug our different neural networks
+    "configurations": [
+        {
+            "name": "Main CNN Training",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["main", "data/imdb_sentiment_train_5k.jsonl",
+                    "data/imdb_sentiment_dev.jsonl", 
+                    "--seq2vec-choice", "cnn",
+                    "--embedding-dim", "50",
+                    "--num-layers", "4",
+                    "--num-epochs", "5",
+                    "--suffix-name", "_cnn_5k_with_emb",
+                    "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
+        },
+
+        {
+            "name": "Main DAN Attn",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["main", 
+                    "data/imdb_sentiment_train_5k.jsonl",
+                    "data/imdb_sentiment_dev.jsonl", 
+                    "--seq2vec-choice", "dan_attn",
+                    "--embedding-dim", "50",
+                    "--num-layers", "4",
+                    "--num-epochs", "5",
+                    "--suffix-name", "_dan_attn_5k_with_emb",
+                    "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
+        },
+
+        {
+            "name": "Main Bi-LSTM",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["main", 
+                    "data/imdb_sentiment_train_5k.jsonl",
+                    "data/imdb_sentiment_dev.jsonl", 
+                    "--seq2vec-choice", "bi_lstm",
+                    "--embedding-dim", "50",
+                    "--num-layers", "4",
+                    "--num-epochs", "5",
+                    "--suffix-name", "_bi_lstm_5k_with_emb",
+                    "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
+        },
+
+    
+        // This is for probing, keeping this here as we may need to 
+        // add more debugging configurations
+        {
+            "name": "Probing Training (GRU)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["probing", 
+                    "data/imdb_sentiment_train_5k.jsonl",
+                    "data/imdb_sentiment_dev.jsonl", 
+                    "--base-model-dir", "serialization_dirs/main_gru_5k_with_emb",
+                    "--num-epochs", "5",
+                    "--layer-num", "3"]
+        },
+
+        
+        
+    
+    ]
+}
