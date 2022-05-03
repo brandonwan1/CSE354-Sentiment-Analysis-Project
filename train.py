@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # Setup parser arguments for main model
     main_model_subparser = subparsers.add_parser("main", description='Train Main Model',
                                                  parents=[base_parser])
-    main_model_subparser.add_argument('--seq2vec-choice', type=str, choices=("dan", "gru"),
+    main_model_subparser.add_argument('--seq2vec-choice', type=str, choices=("dan", "gru", "cnn", "danwithattention", "bilstm"),
                                       help='choice of seq2vec. '
                                       'Required if load_serialization_dir not passed.')
     main_model_subparser.add_argument('--embedding-dim', type=int, help='embedding_dim '

@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 
 # project imports
-from sequence_to_vector import DanSequenceToVector, GruSequenceToVector
+from sequence_to_vector import BiLSTMSequenceToVector, CNNSequenceToVector, DanSequenceToVector, DanWithAttentionSequenceToVector, GruSequenceToVector
 
 torch.manual_seed(1337)
 
@@ -47,8 +47,19 @@ class MainClassifier(nn.Module):
 
         if seq2vec_choice == "dan":
             self._seq2vec_layer = DanSequenceToVector(embedding_dim, num_layers, device = device).to(device)
-        else:
+        elif seq2vec_choice == 'gru':
             self._seq2vec_layer = GruSequenceToVector(embedding_dim, num_layers, device = device).to(device)
+        elif seq2vec_choice == 'cnn':
+            self._seq2vec_layer = CNNSequenceToVector(embedding_dim, num_layers, device = device).to(device)
+        elif seq2vec_choice == 'danwithattention':
+            self._seq2vec_layer = DanWithAttentionSequenceToVector(embedding_dim, num_layers, device = device).to(device)
+        elif seq2vec_choice == 'bilstm':
+            self._seq2vec_layer = BiLSTMSequenceToVector(embedding_dim, num_layers, device = device).to(device)
+        else:
+            print("Invalid --seq2vec-choice argument. The possible arguments are dan, gru, cnn, danwithattention, and bilstm")
+            print("Please try to run this again with one of the valid seq2vec choices. Exiting program")
+            quit()
+
 
         # Trainable Variables
         torch.manual_seed(42)

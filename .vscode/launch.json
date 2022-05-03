@@ -1,7 +1,4 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
 
     // These configurations are here to help debug our different neural networks
@@ -33,7 +30,7 @@
             "args": ["main", 
                     "data/imdb_sentiment_train_5k.jsonl",
                     "data/imdb_sentiment_dev.jsonl", 
-                    "--seq2vec-choice", "dan_attn",
+                    "--seq2vec-choice", "danwithattention",
                     "--embedding-dim", "50",
                     "--num-layers", "4",
                     "--num-epochs", "5",
@@ -51,7 +48,7 @@
             "args": ["main", 
                     "data/imdb_sentiment_train_5k.jsonl",
                     "data/imdb_sentiment_dev.jsonl", 
-                    "--seq2vec-choice", "bi_lstm",
+                    "--seq2vec-choice", "bilstm",
                     "--embedding-dim", "50",
                     "--num-layers", "4",
                     "--num-epochs", "5",

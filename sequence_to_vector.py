@@ -88,15 +88,9 @@ class DanSequenceToVector(SequenceToVector):
     def __init__(self, input_dim: int, num_layers: int, dropout: float = 0.2, device='cpu'):
         super(DanSequenceToVector, self).__init__(input_dim)
         # TODO(students): start
-
-        # subclass of SequenceToVector
         self.num_layers = num_layers
-
-        # likelihood of a word being dropped
         self.dropout = dropout
-
         self.device = device
-
         self.layers = nn.Sequential()
 
         for i in range(num_layers):
@@ -158,7 +152,7 @@ class DanSequenceToVector(SequenceToVector):
         for fflayer in self.layers:
             combined_vector = fflayer(combined_vector)
 
-            # add the representations after before undergoing relu activation
+            # add the representations after relu activation
             if type(fflayer) == nn.modules.linear.Linear:
                 layer_representations.append(combined_vector)
 
@@ -307,7 +301,8 @@ class DanWithAttentionSequenceToVector(SequenceToVector):
         vector_sequence = self.attention(vector_sequence, vector_sequence, vector_sequence)
 
         # computes the averages of the inputs
-        combined_vector = torch.sum(vector_sequence, dim=1)
+        
+        combined_vector = torch.sum(vector_sequence, dim=1) # vector_sequence is being detected as a tuple here 
         num_words = torch.sum(sequence_mask, dim=1)
         num_words[num_words == 0] = 1  # replaces all 0s with 1s so no divide by zero error is thrown
 
@@ -360,6 +355,7 @@ class BiLSTMSequenceToVector(SequenceToVector):
 
         _, layer_representations = self.layers(padded)
         combined_vector = layer_representations[-1]
+        print(type(layer_representations))
         layer_representations = torch.permute(layer_representations, (1, 0, 2))
         # TODO(students): end
         return {"combined_vector": combined_vector,
