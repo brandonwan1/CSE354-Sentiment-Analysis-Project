@@ -298,12 +298,13 @@ class DanWithAttentionSequenceToVector(SequenceToVector):
         vector_sequence = vector_sequence * sequence_mask[:, :, None]
 
         # runs through attention mechanism
-        vector_sequence = self.attention(vector_sequence, vector_sequence, vector_sequence)
+        attn_outputs, attn_output_weights = self.attention(vector_sequence, vector_sequence, vector_sequence)
 
-        # computes the averages of the inputs
         
-        combined_vector = torch.sum(vector_sequence, dim=1) # vector_sequence is being detected as a tuple here 
+        # computes the averages of the inputs
+        combined_vector = torch.sum(attn_outputs, dim=1) 
         num_words = torch.sum(sequence_mask, dim=1)
+
         num_words[num_words == 0] = 1  # replaces all 0s with 1s so no divide by zero error is thrown
 
         combined_vector = combined_vector * torch.reciprocal(num_words[:, None])
@@ -311,6 +312,8 @@ class DanWithAttentionSequenceToVector(SequenceToVector):
         stack = []
         for i, layer in enumerate(self.model):
             combined_vector = layer(combined_vector)
+
+            # Add the layer after RELU activation
             if i % 2 == 0:
                 stack.append(torch.clone(combined_vector))
 
