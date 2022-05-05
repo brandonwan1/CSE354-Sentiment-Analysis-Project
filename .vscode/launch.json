@@ -34,7 +34,7 @@
                     "--embedding-dim", "50",
                     "--num-layers", "4",
                     "--num-epochs", "5",
-                    "--suffix-name", "_dan_attn_5k_with_emb",
+                    "--suffix-name", "_danwithattention_5k_with_emb",
                     "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
         },
 
@@ -52,7 +52,7 @@
                     "--embedding-dim", "50",
                     "--num-layers", "4",
                     "--num-epochs", "50",
-                    "--suffix-name", "_dan_attn_15k_with_emb_for_50_epoch",
+                    "--suffix-name", "_danwithattention_15k_with_emb_for_50_epoch",
                     "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
         },
 
@@ -70,7 +70,7 @@
                     "--embedding-dim", "50",
                     "--num-layers", "4",
                     "--num-epochs", "5",
-                    "--suffix-name", "_bi_lstm_5k_with_emb",
+                    "--suffix-name", "_bilstm_5k_with_emb",
                     "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
         },
 
