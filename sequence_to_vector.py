@@ -356,10 +356,26 @@ class BiLSTMSequenceToVector(SequenceToVector):
         padded = nn.utils.rnn.pack_padded_sequence(vector_sequence, lengths,
                                                    batch_first=True, enforce_sorted=False)
 
-        _, layer_representations = self.layers(padded)
-        combined_vector = layer_representations[-1]
-        print(type(layer_representations))
-        layer_representations = torch.permute(layer_representations, (1, 0, 2))
+        # output, (h_n, c_n)  
+        _, (hidden_n, cell_n) = self.layers(padded)
+
+        stack = []
+
+        # A bi-LSTM with 4 layers will have 8 hidden states (2 for each direction per layer)
+        # Aggregate fwd and backwd representations at each layer (by averaging them)
+        # ** We can try concatenation as well
+        for i in range(0, len(hidden_n), 2):
+            ht_fwd, ht_back = hidden_n[i,:,:], hidden_n[i+1,:,:]
+
+            layers_summed = torch.add(ht_fwd, ht_back)
+            averaged_representation = torch.div(layers_summed, 2)
+
+            stack.append(averaged_representation)
+
+        # Combined_vector will be the last (aggregated) hidden state
+        combined_vector = stack[-1]
+        layer_representations = torch.stack(stack, dim=1)
+
         # TODO(students): end
         return {"combined_vector": combined_vector,
                 "layer_representations": layer_representations}
