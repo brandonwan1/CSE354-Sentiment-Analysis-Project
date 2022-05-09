@@ -243,12 +243,48 @@ class GruSequenceToVector(SequenceToVector):
 
 class CNNSequenceToVector(SequenceToVector):
     #TODO
-    def __init__(self, input_dim: int, num_layers: int, stride=2, device='cpu'):
+    ''''
+    It is a class defining CNN based Sequence To Vector encoder.
+    You have to implement this.
+    
+    Parameters
+    ----------
+    input_dim : ``str``
+        Last dimension of the input input vector sequence that
+        this SentenceToVector encoder will encounter.
+    num_layers : ``int``
+        Number of layers in this CNN-based encoder.
+    ''''
+    def __init__(self, input_dim: int, num_layers: int, device='cpu'):
         super(CNNSequenceToVector, self).__init__(input_dim)
-        layers = []
-
-        for _ in range(num_layers):
-            layers.append(nn.Conv2d())
+        self.layers = []
+        self.stride = 1
+        self.device = 'cpu'
+        self.input_dim = input_dim
+        channels = self.input_dim
+        self.num_layers = num_layers
+        for i in range(self.num_layers):
+            self.layers.append(nn.Conv1d(in_channels=self.input_dim,out_channels=self.input_dim,kernel_size=1,stride = self.stride))
+    def forward(self,vector_sequence: torch.Tensor,sequence_mask: torch.Tensor,training=False):
+      representations = []
+      combined_vector = vector_sequence.permute(0, 2, 1)
+      max_token = vector_sequence.shape[1]
+      
+      for i in range(0,self.num_layers):
+        kernel_size = int((max_token-1)/(self.num_layers-i)) + 1
+        #Apply cnn, relu to the vector sequence
+        combined_vector = F.relu(self.layers[i](combined_vector))
+        #Apply max pooling over a combined vector
+        max_token = max_token - kernel_size + 1
+        combined_vector = nn.MaxPool1d(kernel_size, stride=1)(combined_vector)
+        ##Generate each layer representation
+        repre = torch.mean(combined_vector, 2)
+        representations.append(repre)
+      
+      layer_representations = torch.stack(representations,dim=1)
+      combined_vector = torch.squeeze(combined_vector)
+      return {"combined_vector": combined_vector,
+                "layer_representations": layer_representations}
 
 
 class DanWithAttentionSequenceToVector(SequenceToVector):
