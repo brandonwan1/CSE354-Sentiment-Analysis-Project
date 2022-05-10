@@ -10,7 +10,7 @@ from evaluate import evaluate
 if __name__ == '__main__':
 
     training_commands, predict_commands = [], []
-    seq2vec_name_to_last_layer = {"dan": 4, "gru": 4}
+    seq2vec_name_to_last_layer = {"cnn": 4, "danwithattention": 4, "bilstm": 4}
     probing_accuracies = {}
 
     for seq2vec_name, layer in seq2vec_name_to_last_layer.items():
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         serialization_dir = os.path.join("serialization_dirs", f"main_{seq2vec_name}_5k_with_emb")
         model_files_present = all([os.path.exists(os.path.join(serialization_dir, file_name))
                                    for file_name in ["model.pkg", "config.json", "vocab.txt"]])
-        epochs = 8 if seq2vec_name == "dan" else 4 # gru is slow, use only 4 epochs
+        epochs = 8 if seq2vec_name != "bilstm" else 4 # bilstm is slow, use 4 epochs
         if not model_files_present:
             print("\nYour base model hasn't been trained yet.")
             print("Please train it first with the following command:")
@@ -78,9 +78,9 @@ if __name__ == '__main__':
         exit()
 
     # Make the plots
-    seq2vec_names = ["dan", "gru"]
+    seq2vec_names = ["cnn", "danwithattention", "bilstm"]
     plt.xticks(range(2), seq2vec_names)
-    plt.bar(range(2), [probing_accuracies["dan"], probing_accuracies["gru"]],
+    plt.bar(range(2), [probing_accuracies["cnn"], probing_accuracies["danwithattention"], probing_accuracies["bilstm"]],
             align='center', alpha=0.5)
     plt.ylabel('Accuracy')
     plt.title('BigramOrderTask: Probing Performance at Last Layer')
