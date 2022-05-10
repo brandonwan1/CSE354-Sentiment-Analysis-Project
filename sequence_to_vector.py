@@ -243,7 +243,7 @@ class GruSequenceToVector(SequenceToVector):
 
 class CNNSequenceToVector(SequenceToVector):
     #TODO
-    ''''
+    '''
     It is a class defining CNN based Sequence To Vector encoder.
     You have to implement this.
     
@@ -254,7 +254,8 @@ class CNNSequenceToVector(SequenceToVector):
         this SentenceToVector encoder will encounter.
     num_layers : ``int``
         Number of layers in this CNN-based encoder.
-    ''''
+    '''
+
     def __init__(self, input_dim: int, num_layers: int, device='cpu'):
         super(CNNSequenceToVector, self).__init__(input_dim)
         self.layers = []
