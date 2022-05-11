@@ -47,8 +47,6 @@ class ProbingClassifier(nn.Module):
         self.input_dim = input_dim
 
         self.linear = nn.Linear(in_features=self.input_dim, out_features=self.classes_num)
-
-        
         
         # TODO(students): end
 
@@ -79,9 +77,8 @@ class ProbingClassifier(nn.Module):
         # model_result is a dictionary
         layer_representations = model_result['layer_representations']
 
-        # tensors can be indexed [:,:, :]
-        # if looking for third layer, subtract one from layer num (2)
-        frozen_layer_rep = layer_representations[self._layer_num-1,:,:]
+        # layer representations will be of shape [batch_size, layer_num, embedding_dim]
+        frozen_layer_rep = layer_representations[:,self._layer_num-1,:]
         
 
         logits = self.linear(frozen_layer_rep)

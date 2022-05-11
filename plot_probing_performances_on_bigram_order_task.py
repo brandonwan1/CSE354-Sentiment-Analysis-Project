@@ -79,8 +79,8 @@ if __name__ == '__main__':
 
     # Make the plots
     seq2vec_names = ["cnn", "danwithattention", "bilstm"]
-    plt.xticks(range(2), seq2vec_names)
-    plt.bar(range(2), [probing_accuracies["cnn"], probing_accuracies["danwithattention"], probing_accuracies["bilstm"]],
+    plt.xticks(range(3), seq2vec_names)
+    plt.bar(range(3), [probing_accuracies["cnn"], probing_accuracies["danwithattention"], probing_accuracies["bilstm"]],
             align='center', alpha=0.5)
     plt.ylabel('Accuracy')
     plt.title('BigramOrderTask: Probing Performance at Last Layer')
