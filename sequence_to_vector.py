@@ -157,7 +157,7 @@ class DanSequenceToVector(SequenceToVector):
                 layer_representations.append(combined_vector)
 
         # stack the representations and turn into a tensor
-        layer_representations = torch.stack(layer_representations, dim=0)
+        layer_representations = torch.stack(layer_representations, dim=1)
 
         # TODO(students): end
         return {"combined_vector": combined_vector,
@@ -307,17 +307,18 @@ class DanWithAttentionSequenceToVector(SequenceToVector):
     def __init__(self, input_dim: int, num_layers: int, embedding_dim: int = 50, dropout: float = 0.2, device='cpu'):
         super(DanWithAttentionSequenceToVector, self).__init__(input_dim)
         # TODO(students): start
-        layers = []
         self.device = device
 
-        for _ in range(num_layers - 1):
-            layers.append(nn.Linear(in_features=input_dim, out_features=input_dim, device=device))
-            layers.append(nn.ReLU())
+        self.model = nn.Sequential()
 
-        layers.append(nn.Linear(in_features=input_dim, out_features=input_dim, device=device))
+        for i in range(num_layers):
+            self.model.add_module(f"linear{i + 1}",
+                                   nn.Linear(in_features=input_dim, out_features=input_dim))
 
-        self.attention = nn.MultiheadAttention(embed_dim=embedding_dim, num_heads=1, batch_first=True)
-        self.model = nn.ModuleList(layers)
+            if i < num_layers - 1:
+                self.model.add_module(f"RELU_{i + 1}", nn.ReLU())
+
+        self.attention = nn.MultiheadAttention(embed_dim=input_dim, num_heads=1, batch_first=True)
         self.dropout = dropout
         # TODO(students): end
 
@@ -351,7 +352,7 @@ class DanWithAttentionSequenceToVector(SequenceToVector):
             combined_vector = layer(combined_vector)
 
             # Add the layer after RELU activation
-            if i % 2 == 0:
+            if i % 2 != 0:
                 stack.append(torch.clone(combined_vector))
 
         stack.append(torch.clone(combined_vector))
@@ -404,10 +405,11 @@ class BiLSTMSequenceToVector(SequenceToVector):
         for i in range(0, len(hidden_n), 2):
             ht_fwd, ht_back = hidden_n[i,:,:], hidden_n[i+1,:,:]
 
-            layers_summed = torch.add(ht_fwd, ht_back)
-            averaged_representation = torch.div(layers_summed, 2)
+            # add the forward and back representations
+            repns_summed = torch.add(ht_fwd, ht_back)
+            # averaged_representation = torch.div(repns_summed, 2)
 
-            stack.append(averaged_representation)
+            stack.append(repns_summed)
 
         # Combined_vector will be the last (aggregated) hidden state
         combined_vector = stack[-1]
