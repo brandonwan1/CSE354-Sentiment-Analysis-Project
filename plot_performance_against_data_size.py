@@ -8,11 +8,13 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     missing_metrics_paths = []
     training_commands = []
-    seq2vec_choices = ["dan", "gru"]
+    seq2vec_choices = ["cnn", "danwithattention", "bilstm"] # dan and gru removed
     data_sizes = ["5k", "10k", "15k"]
-    validation_accuracies = {"dan": [], "gru": []}
+    
+    # "dan": [], "gru": [], removed because we are not checking the performance of these
+    validation_accuracies = {"cnn": [], "danwithattention": [], "bilstm": []}
     for seq2vec_choice in seq2vec_choices:
-        epochs = 8 if seq2vec_choice == "dan" else 4 # gru is slow, use only 4 epochs
+        epochs = 8 if seq2vec_choice != "bilstm" else 4 # bilstm will be slow
         for size in data_sizes:
 
             serialization_dir = os.path.join("serialization_dirs",

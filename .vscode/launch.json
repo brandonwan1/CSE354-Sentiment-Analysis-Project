@@ -38,23 +38,6 @@
                     "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
         },
 
-        {
-            "name": "Main DAN Attn (Long)",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/train.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["main", 
-                    "data/imdb_sentiment_train_15k.jsonl",
-                    "data/imdb_sentiment_dev.jsonl", 
-                    "--seq2vec-choice", "danwithattention",
-                    "--embedding-dim", "50",
-                    "--num-layers", "4",
-                    "--num-epochs", "50",
-                    "--suffix-name", "_danwithattention_15k_with_emb_for_50_epoch",
-                    "--pretrained-embedding-file", "data/glove.6B.50d.txt"]
-        },
 
         {
             "name": "Main Bi-LSTM",
@@ -91,9 +74,5 @@
                     "--num-epochs", "5",
                     "--layer-num", "3"]
         },
-
-        
-        
-    
     ]
 }

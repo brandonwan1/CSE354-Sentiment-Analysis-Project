@@ -23,10 +23,10 @@ if __name__ == '__main__':
 
     training_commands = []
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    choices = {"dan": range(1, 4+1), "gru": range(1, 4+1)}
+    choices = {"cnn": range(1, 4+1), "danwithattention": range(1, 4+1), "bilstm": range(1, 4+1)}
 
-    models = {"dan": None, "gru": None}
-    vocabs = {"dan": None, "gru": None}
+    models = {"cnn": None, "danwithattetion": None, "bilstm": None}
+    vocabs = {"cnn": None, "danwithattetion": None, "bilstm": None}
     for seq2vec_name, _ in choices.items():
 
         serialization_dir = os.path.join("serialization_dirs", f"main_{seq2vec_name}_5k_with_emb")
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         model_files_present = all([os.path.exists(path)
                                    for path in [vocab_path, config_path, weights_path]])
         if not model_files_present:
-            epochs = 8 if seq2vec_name == "dan" else 4 # gru is slow, use only 4 epochs
+            epochs = 8 if seq2vec_name != "bilstm" else 4 # bilstm is slow, use 4 epochs
             training_command = (f"python train.py main "
                                 f"data/imdb_sentiment_train_5k.jsonl "
                                 f"data/imdb_sentiment_dev.jsonl "
