@@ -258,14 +258,16 @@ class CNNSequenceToVector(SequenceToVector):
 
     def __init__(self, input_dim: int, num_layers: int, device='cpu'):
         super(CNNSequenceToVector, self).__init__(input_dim)
-        self.layers = []
+        self.layers = nn.Sequential()
         self.stride = 1
         self.device = 'cpu'
         self.input_dim = input_dim
         channels = self.input_dim
         self.num_layers = num_layers
+
         for i in range(self.num_layers):
-            self.layers.append(nn.Conv1d(in_channels=self.input_dim,out_channels=self.input_dim,kernel_size=1,stride = self.stride))
+            self.layers.add_module(f"Conv1d L{i+1}", nn.Conv1d(in_channels=self.input_dim,out_channels=self.input_dim,kernel_size=1,stride = self.stride))
+            
     def forward(self,vector_sequence: torch.Tensor,sequence_mask: torch.Tensor,training=False):
       representations = []
       combined_vector = vector_sequence.permute(0, 2, 1)
