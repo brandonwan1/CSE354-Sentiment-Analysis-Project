@@ -8,10 +8,10 @@ Comes from original Assigment 2 code
 sequence_to_vector.py includes the new models used in this assigment as separate classes.
 
 The following files were changed to allow for the new models to parsed as arguments: \
-train.py
-plot_performance_against_data_size.py
-plot_probing_performances_on_sentiment_task.py
-plot_probing_performances_on_bigram_order_task.py
+train.py\
+plot_performance_against_data_size.py\
+plot_probing_performances_on_sentiment_task.py\
+plot_probing_performances_on_bigram_order_task.py\
 plot_perturbation_analysis.py
 
 # Commands
@@ -108,3 +108,16 @@ There are four scripts in the code that will allow you to do analyses on the sen
 2. `plot_probing_performances_on_sentiment_task.py`
 3. `plot_probing_performances_on_bigram_order_task.py`
 4. `plot_perturbation_analysis.py`
+
+## Software Used
+Python 3.6\
+Pytorch 1.9.0\
+numpy 1.19.5\
+tqdm 4.62.2\
+mypy 0.910\
+mypy-extensions 0.4.3\
+typing-extensions 3.10.0.2\
+overrides 6.1.0\
+spacy 3.1.2\
+matplotlib 3.3.4\
+tensorboard 2.6.0
