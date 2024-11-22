@@ -2,7 +2,7 @@
 NLP Project for James You, Wenjun Yang, Brandon Wan
 
 # Codebase Source
-Comes from original Assigment 2 code
+Comes from original Assignment 2 code
 
 # Files Modified
 sequence_to_vector.py includes the new models used in this assigment as separate classes.
